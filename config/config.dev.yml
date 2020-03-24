@@ -1,0 +1,43 @@
+gcp:
+    type: service_account
+    project_id: infect-209419
+    private_key_id: 950c2b596f6d41c1673c1d4107c830127f9c9958
+    private_key: ${GCP_PRIVATE_KEY}
+    client_email: infect-import@infect-209419.iam.gserviceaccount.com
+    client_id: 104988934709381310515
+    auth_uri: https://accounts.google.com/o/oauth2/auth
+    token_uri: https://oauth2.googleapis.com/token
+    auth_provider_x509_cert_url: https://www.googleapis.com/oauth2/v1/certs
+    client_x509_cert_url: https://www.googleapis.com/robot/v1/metadata/x509/infect-import%40infect-209419.iam.gserviceaccount.com
+    s3-bucket: infet-data-import-blobs
+    s3-prefix: dev
+    chunk-size: 2000000
+
+imports:
+    anresis-human:
+        sftp-server:
+            hostname: l.dns.porn
+            privateKey: ${ANRESIS_PRIVATE_KEY}
+            port: 22
+            username: ee
+            file-path: /home/ee/dev/infect/anresis-import-service/data/human.csv
+
+        data-set-name: infect-human
+
+    anresis-vet:
+        sftp-server:
+            hostname: l.dns.porn
+            privateKey: ${ANRESIS_PRIVATE_KEY}
+            port: 22
+            username: ee
+            file-path: /home/ee/dev/infect/anresis-import-service/data/vet.csv
+
+        data-set-name: infect-vet
+
+
+
+service-registry:
+    host: http://l.dns.porn:9000
+
+lock-ttl: 10
+thread-count: 4
