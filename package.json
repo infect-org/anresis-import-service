@@ -1,6 +1,6 @@
 {
   "name": "anresis-import-service",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "importer for anresis infect data",
   "main": "index.js",
   "directories": {},
