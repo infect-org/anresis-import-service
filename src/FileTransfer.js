@@ -147,17 +147,20 @@ export default class FielTransfer {
         const fileName = `anresis-import-${new Date().toISOString()}-${stats.size}-${stats.mtime}.csv`;
 
         // check if there is a lock for that file
-        log.debug(`aquiring lock ...`);
+        log.debug(`aquiring lock ${lockName} ...`);
         const exists = await this.lockClient.hasLock(lockName);
 
         if (!exists) {
-            await this.lockClient.createLock(lockName, {
+            const lock = await this.lockClient.createLock(lockName, {
                 keepAlive: false,
                 ttl: this.config.get('lock-ttl'),
             });
+            await lock.lock();
+            log.debug(`lock ${lockName} aquired ...`);
+
             log.debug(`creating readstream for ${anresisFilePath} ...`);
 
-            // aquire a readstream from the sftp server, pipe it into the gcp storage
+            // aquire a read stream from the sftp server, pipe it into the gcp storage
             const readStream = await this.sftpClient.createReadStream(anresisFilePath);
 
             const bucket = this.s3Client.bucket(this.config.get('gcp.s3-bucket'));
@@ -188,6 +191,8 @@ export default class FielTransfer {
             });
 
             this._needsImport = true;
+        } else {
+            log.debug(`lock ${lockName} exists, import for file was already executed ...`);
         }
     }
 

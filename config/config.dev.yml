@@ -16,21 +16,21 @@ gcp:
 imports:
     anresis-human:
         sftp-server:
-            hostname: l.dns.porn
+            hostname: domain.search.ifik.unibe.ch
             privateKey: ${ANRESIS_PRIVATE_KEY}
             port: 22
-            username: ee
-            file-path: /home/ee/dev/infect/anresis-import-service/data/human.csv
+            username: infect
+            file-path: /upload/INFECT_export_month.csv
 
         data-set-name: infect-human
 
     anresis-vet:
         sftp-server:
-            hostname: l.dns.porn
+            hostname: domain.search.ifik.unibe.ch
             privateKey: ${ANRESIS_PRIVATE_KEY}
             port: 22
-            username: ee
-            file-path: /home/ee/dev/infect/anresis-import-service/data/vet.csv
+            username: infect
+            file-path: /upload/INFVET_export.csv
 
         data-set-name: infect-vet
 
@@ -39,5 +39,6 @@ imports:
 service-registry:
     host: http://l.dns.porn:9000
 
-lock-ttl: 10
+# keep locks for a year!
+lock-ttl: 31104000
 thread-count: 4
