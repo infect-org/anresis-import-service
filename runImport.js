@@ -19,5 +19,14 @@ service.load().then(async () => {
     log.success(`The anresis import service is listening on port ${service.server.port}`);
     
     await service.runImport(process.argv.includes('--vet') ? 'anresis-vet': 'anresis-human');
-}).catch(log);
+
+    setImmediate(() => {
+        process.exit();
+    });
+}).catch((err) => {
+    log.error(err);
+    setImmediate(() => {
+        process.exit();
+    });
+});
 
