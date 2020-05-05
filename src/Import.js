@@ -48,20 +48,20 @@ export default class Import extends EventEmitter {
      */
     async import() {
         log.info(`setting up file transfer`);
-        const transfer = new FileTransfer({
+        this.transfer = new FileTransfer({
             config: this.config,
             importName: this.importName,
         });
         
         // get data from anresis, store it on gcp storage
         log.debug(`checking for new data`);
-        await transfer.checkForData();
+        await this.transfer.checkForData();
 
         // check if new data was detected, return if not
-        if (transfer.hasNewData()) log.info(`new data found!`);
+        if (this.transfer.hasNewData()) log.info(`new data found!`);
         else log.info(`no new data found`);
 
-        if (!transfer.hasNewData()) return;
+        if (!this.transfer.hasNewData()) return;
 
         const dataSetName = this.config.get(`imports.${this.importName}.data-set-name`);
         const importIdentifier = `${dataSetName}-import-${new Date().toISOString()}`;
@@ -80,7 +80,7 @@ export default class Import extends EventEmitter {
             await Promise.all(Array.apply(null, { length: this.threadCount }).map(async() => {
                 while (true) {
                     log.debug(`getting data chunk ..`);
-                    const chunk = await transfer.getChunk();
+                    const chunk = await this.transfer.getChunk();
 
                     if (chunk === null) break;
                     log.debug(`got ${chunk.length} bytes of data`);
@@ -92,12 +92,12 @@ export default class Import extends EventEmitter {
             this.deleteImport();
             this.emit('end', err);
             this.emit('error', err);
-            await transfer.end();
+            await this.transfer.end();
             throw err;
         }
 
         await this.commitImport();
-        await transfer.end();
+        await this.transfer.end();
 
         this.emit('end');
     }
@@ -112,6 +112,7 @@ export default class Import extends EventEmitter {
      */
     async deleteImport() {
         log.warn(`deleting import!`);
+        await this.transfer.cancelLock();
         await this.importClient.delete();
     }
 

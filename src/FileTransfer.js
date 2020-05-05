@@ -151,11 +151,11 @@ export default class FielTransfer {
         const exists = await this.lockClient.hasLock(lockName);
 
         if (!exists) {
-            const lock = await this.lockClient.createLock(lockName, {
+            this.lock = await this.lockClient.createLock(lockName, {
                 keepAlive: false,
                 ttl: this.config.get('lock-ttl'),
             });
-            await lock.lock();
+            await this.lock.lock();
             log.debug(`lock ${lockName} aquired ...`);
 
             log.debug(`creating readstream for ${anresisFilePath} ...`);
@@ -196,6 +196,13 @@ export default class FielTransfer {
         }
     }
 
+
+
+    async cancelLock() {
+        if (this.lock) {
+            await this.lock.cancel();
+        }
+    }
 
 
 
