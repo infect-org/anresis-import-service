@@ -47,9 +47,14 @@ export default class Report {
         msg += `<strong>Total imported samples</strong>: ${this.getTotalSampleCount()}<br />`;
         msg += `<strong>Failed to import samples</strong>: ${this.getInvalidSamplesCount()}<br /><br />`;
 
+        msg += `<p>The newly imported data is avilable from tomorrow on, then you may the links below to view and check the new data.</p>`;
+
         msg += `<a clicktracking=off href="https://${this.domain}?dataVersionStatusIdentifiers=active" target="_blank">INFECT ${this.importName} - existing data only</a><br />`;
         msg += `<a clicktracking=off href="https://${this.domain}?dataVersionStatusIdentifiers=preview" target="_blank">INFECT ${this.importName} - new imported data only</a><br />`;
         msg += `<a clicktracking=off href="https://${this.domain}?dataVersionStatusIdentifiers=active,preview" target="_blank">INFECT ${this.importName} - existing and new imported data mixed</a><br /><br />`;
+
+        msg += `<h3>Publish Data</h3>`;
+        msg += `<p>Be aware, that the data imported is not visible before tomorrows, so you should not publish or unpublish it before you have checked it with the links above!</p>`;
 
         msg += `<a clicktracking=off href="https://api.${this.domain}/rda/v2/rda.dataVersionStatus?identifier=${this.importIdentifier}&token=${this.token}&action=activate" target="_blank">INFECT ${this.importName} - publish newly imported data</a><br />`;
         msg += `<a clicktracking=off href="https://api.${this.domain}/rda/v2/rda.dataVersionStatus?identifier=${this.importIdentifier}&token=${this.token}&action=deactivate" target="_blank">INFECT ${this.importName} - unpublish newly imported data</a><br /><br />`;
