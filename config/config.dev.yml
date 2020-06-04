@@ -20,9 +20,10 @@ imports:
             privateKey: ${ANRESIS_PRIVATE_KEY}
             port: 22
             username: infect
-            file-path: /upload/INFECT_export_month.csv
+            file-path: /upload/INFECT_export.csv
 
         data-set-name: infect-human
+        domain: infect.info
 
     anresis-vet:
         sftp-server:
@@ -33,12 +34,19 @@ imports:
             file-path: /upload/INFVET_export.csv
 
         data-set-name: infect-vet
+        domain: vet.infect.info
 
 
 
 service-registry:
     host: http://l.dns.porn:9000
 
+mailer:
+    apiKey: ${SENDGRID_API_KEY}
+    from: reports@infect.info
+    recipients:
+        - lina@joinbox.com
+
 # keep locks for a year!
 lock-ttl: 31104000
-thread-count: 4
+thread-count: 41

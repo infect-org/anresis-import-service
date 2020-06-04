@@ -29,5 +29,12 @@ imports:
 service-registry:
     host: http://l.dns.porn:9000
 
+
+mailer:
+    apiKey: ${SENDGRID_API_KEY}
+    from: reports@infect.info
+    recipients:
+        - lina@joinbox.com
+
 lock-ttl: 10
 thread-count: 4
