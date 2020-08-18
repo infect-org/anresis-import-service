@@ -9,7 +9,9 @@
     "import-vet": "node --max-old-space-size=16000 --no-warnings --experimental-modules ./runImport.js --vet --dev --log-level=debug+ --log-module=*",
     "import-human": "node --max-old-space-size=16000 --no-warnings --experimental-modules ./runImport.js --dev --log-level=debug+ --log-module=*",
     "import-prod-vet": "node --max-old-space-size=16000 --no-warnings --experimental-modules ./runImport.js --vet --prod --log-level=debug+ --log-module=*",
-    "import-prod-human": "node --max-old-space-size=16000 --no-warnings --experimental-modules ./runImport.js --prod --log-level=debug+ --log-module=*"
+    "import-prod-human": "node --max-old-space-size=16000 --no-warnings --experimental-modules ./runImport.js --prod --log-level=debug+ --log-module=*",
+    "import-prod-vet": "node --max-old-space-size=16000 --no-warnings --experimental-modules ./runImport.js --vet --beta --log-level=debug+ --log-module=*",
+    "import-prod-human": "node --max-old-space-size=16000 --no-warnings --experimental-modules ./runImport.js --beta --log-level=debug+ --log-module=*"
   },
   "author": "Lina van der Weg",
   "license": "MIT",
