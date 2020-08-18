@@ -34,6 +34,8 @@ export default class Import extends EventEmitter {
 
         // collect samples that failed to import
         this.invalidSamples = [];
+        this.importedRecordCount = 0;
+        this.duplicateRecordCount = 0;
         this.sampleCount = 0;
         this.threadCount = this.config.get('thread-count');
     }
@@ -166,9 +168,17 @@ export default class Import extends EventEmitter {
             }
         });
 
-        const invalidSamples = await this.importClient.storeSamples(records);
+        const {
+            invalidSamples,
+            importedRecordCount,
+            duplicateRecordCount,
+            totalRecordCount,
+        } = await this.importClient.storeSamples(records);
+
         log.debug(`the import service rejected ${invalidSamples.length} rows due to invalidity ...`);
 
+        this.importedRecordCount += importedRecordCount;
+        this.duplicateRecordCount += duplicateRecordCount;
         this.sampleCount += records.length;
         
         if (invalidSamples.length) {
