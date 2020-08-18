@@ -10,7 +10,7 @@ gcp:
     auth_provider_x509_cert_url: https://www.googleapis.com/oauth2/v1/certs
     client_x509_cert_url: https://www.googleapis.com/robot/v1/metadata/x509/infect-import%40infect-209419.iam.gserviceaccount.com
     s3-bucket: infet-data-import-blobs
-    s3-prefix: dev
+    s3-prefix: production
     chunk-size: 2000000
 
 imports:
@@ -23,7 +23,7 @@ imports:
             file-path: /upload/INFECT_export.csv
 
         data-set-name: infect-human
-        domain: infect.info
+        domain: beta.infect.info
 
     anresis-vet:
         sftp-server:
@@ -34,7 +34,7 @@ imports:
             file-path: /upload/INFVET_export.csv
 
         data-set-name: infect-vet
-        domain: vet.infect.info
+        domain: beta.vet.infect.info
 
 
 
@@ -46,7 +46,8 @@ mailer:
     from: reports@infect.info
     recipients:
         - lina@joinbox.com
+        - pascal@infect.info
 
 # keep locks for a year!
 lock-ttl: 31104000
-thread-count: 41
+thread-count: 1

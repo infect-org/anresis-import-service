@@ -1,9 +1,11 @@
-import FileTransfer from './FileTransfer.js';
 import EventEmitter from 'events';
-import parse from 'csv-parse';
 import InfectRDASampleImportClient from '@infect/infect-rda-sample-importer-client';
 import logd from 'logd';
-import InvalidDataReport from './InvalidDataReport.js';
+import parse from 'csv-parse';
+
+import FileTransfer from './FileTransfer.js';
+import Report from './Report.js';
+import SendGridMailer from './SendGridMailer.js';
 
 
 const log = logd.module('Import');
@@ -16,14 +18,22 @@ export default class Import extends EventEmitter {
         registryClient,
         config,
         importName,
+        testMode = false,
     }) {
         if (!importName) throw new Error(`Missing parameter 'importName'!`);
 
         super();
 
+        this.testMode = testMode;
         this.config = config;
         this.importName = importName;
         this.gcpConfig = this.config.get('gcp');
+
+        this.mailer = new SendGridMailer({
+            from: this.config.get('mailer.from'),
+            apiKey: this.config.get('mailer.apiKey'),
+            recipients: this.config.get('mailer.recipients'),
+        });
 
         // used to buffer chunks of data that cannot be processed  yet
         this.buffer = '';
@@ -32,11 +42,7 @@ export default class Import extends EventEmitter {
             registryClient,
         });
 
-        // collect samples that failed to import
-        this.invalidSamples = [];
-        this.importedRecordCount = 0;
-        this.duplicateRecordCount = 0;
-        this.sampleCount = 0;
+
         this.threadCount = this.config.get('thread-count');
     }
 
@@ -49,40 +55,50 @@ export default class Import extends EventEmitter {
      * storage, reads it again from there and sends it to the infect rda importer
      */
     async import() {
-        log.info(`setting up file transfer`);
-        const transfer = new FileTransfer({
-            config: this.config,
-            importName: this.importName,
-        });
-        
-        // get data from anresis, store it on gcp storage
-        log.debug(`checking for new data`);
-        await transfer.checkForData();
-
-        // check if new data was detected, return if not
-        if (transfer.hasNewData()) log.info(`new data found!`);
-        else log.info(`no new data found`);
-
-        if (!transfer.hasNewData()) return;
-
-        const dataSetName = this.config.get(`imports.${this.importName}.data-set-name`);
-        const importIdentifier = `${dataSetName}-import-${new Date().toISOString()}`;
-
-        log.info(`Creating new import for data set ${dataSetName} with the identifier ${importIdentifier} ...`);
-
-        // create an import on the import agent
-        await this.createImport({
-            dataSetIdentifier: dataSetName,
-            dataVersionIdentifier: importIdentifier,
-            dataVersionDescription: `INFECT '${dataSetName}' data import executed on ${new Date().toISOString()}`,
-        });
-
-
         try {
+            const dataSetName = this.config.get(`imports.${this.importName}.data-set-name`);
+            const importIdentifier = `${dataSetName}-import-${new Date().toISOString()}`;
+            const domain = this.config.get(`imports.${this.importName}.domain`);
+
+            this.report = new Report({
+                importName: this.importName,
+                importIdentifier,
+                domain,
+            });
+
+            log.info(`setting up file transfer`);
+            this.transfer = new FileTransfer({
+                config: this.config,
+                importName: this.importName,
+                testMode: this.testMode,
+            });
+            
+            // get data from anresis, store it on gcp storage
+            log.debug(`checking for new data`);
+            await this.transfer.checkForData();
+
+            // check if new data was detected, return if not
+            if (this.transfer.hasNewData()) log.info(`new data found!`);
+            else log.info(`no new data found`);
+
+            if (!this.transfer.hasNewData()) return;
+
+
+            log.info(`Creating new import for data set ${dataSetName} with the identifier ${importIdentifier} ...`);
+
+            // create an import on the import agent
+            await this.createImport({
+                dataSetIdentifier: dataSetName,
+                dataVersionIdentifier: importIdentifier,
+                dataVersionDescription: `INFECT '${dataSetName}' data import executed on ${new Date().toISOString()}`,
+            });
+
+
+        
             await Promise.all(Array.apply(null, { length: this.threadCount }).map(async() => {
                 while (true) {
                     log.debug(`getting data chunk ..`);
-                    const chunk = await transfer.getChunk();
+                    const chunk = await this.transfer.getChunk();
 
                     if (chunk === null) break;
                     log.debug(`got ${chunk.length} bytes of data`);
@@ -94,12 +110,16 @@ export default class Import extends EventEmitter {
             this.deleteImport();
             this.emit('end', err);
             this.emit('error', err);
-            await transfer.end();
+
+            if (this.transfer) {
+                await this.transfer.end();
+            }
+
             throw err;
         }
 
         await this.commitImport();
-        await transfer.end();
+        await this.transfer.end();
 
         this.emit('end');
     }
@@ -114,6 +134,11 @@ export default class Import extends EventEmitter {
      */
     async deleteImport() {
         log.warn(`deleting import!`);
+        
+        if (this.transfer) {
+            await this.transfer.cancelLock();
+        }
+
         await this.importClient.delete();
     }
 
@@ -125,10 +150,9 @@ export default class Import extends EventEmitter {
     async commitImport() {
         log.info(`Committing import!`);
         await this.importClient.commit();
-
-        const reporter = new InvalidDataReport();
-        const report = reporter.createReport(this.invalidSamples);
-        console.log(report);
+        
+        log.success(`Import was finished successfull!`);
+        await this.mailer.sendReport(this.report);
     }
 
 
@@ -168,24 +192,14 @@ export default class Import extends EventEmitter {
             }
         });
 
-        const {
-            invalidSamples,
-            importedRecordCount,
-            duplicateRecordCount,
-            totalRecordCount,
-        } = await this.importClient.storeSamples(records);
+        const report = await this.importClient.storeSamples(records);
+        this.report.processResults(report);
 
-        log.debug(`the import service rejected ${invalidSamples.length} rows due to invalidity ...`);
-
-        this.importedRecordCount += importedRecordCount;
-        this.duplicateRecordCount += duplicateRecordCount;
-        this.sampleCount += records.length;
-        
-        if (invalidSamples.length) {
-            this.invalidSamples = this.invalidSamples.concat(invalidSamples);
+        if (report.invalidSamples.length) {
+            log.debug(`the import service rejected ${report.invalidSamples.length} rows due to invalidity ...`);
         }
         
-        log.debug(`imported ${this.sampleCount} records, rejected ${this.invalidSamples.length} records ...`);
+        log.debug(`imported ${this.report.getTotalSampleCount()} records, rejected ${this.report.getInvalidSamplesCount()} records ...`);
     }   
 
 

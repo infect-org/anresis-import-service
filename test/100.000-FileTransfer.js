@@ -46,7 +46,8 @@ section('FileTransfer', (section) => {
 
         const fileTransfer = new FileTransfer({
             config,
-            importName: 'test', 
+            importName: 'test',
+            testMode: true,
         });
 
         await fileTransfer.load();
@@ -65,6 +66,7 @@ section('FileTransfer', (section) => {
         const fileTransfer = new FileTransfer({
             config,
             importName: 'test', 
+            testMode: true,
         });
 
         await fileTransfer.load();
@@ -87,6 +89,7 @@ section('FileTransfer', (section) => {
         const fileTransfer = new FileTransfer({
             config,
             importName: 'test', 
+            testMode: true,
         });
 
         await fileTransfer.load();

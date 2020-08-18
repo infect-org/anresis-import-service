@@ -38,6 +38,7 @@ section('Import', (section) => {
             registryClient,
             config,
             importName: 'test', 
+            testMode: true,
         });
 
         await importer.import();
