@@ -16,25 +16,35 @@ gcp:
 imports:
     anresis-human:
         sftp-server:
-            hostname: domain.search.ifik.unibe.ch
+            hostname: l.dns.porn
             privateKey: ${ANRESIS_PRIVATE_KEY}
             port: 22
-            username: infect
-            file-path: /upload/INFECT_export.csv
+            username: lina
+            file-path: /home/lina/dev/infect/anresis-import-service/human.csv
 
         data-set-name: infect-human
-        domain: infect.info
+        domain: l.dns.porn
+    # anresis-human:
+    #     sftp-server:
+    #         hostname: domain.search.ifik.unibe.ch
+    #         privateKey: ${ANRESIS_PRIVATE_KEY}
+    #         port: 22
+    #         username: infect
+    #         file-path: /upload/INFECT_export.csv
 
-    anresis-vet:
-        sftp-server:
-            hostname: domain.search.ifik.unibe.ch
-            privateKey: ${ANRESIS_PRIVATE_KEY}
-            port: 22
-            username: infect
-            file-path: /upload/INFVET_export.csv
+    #     data-set-name: infect-human
+    #     domain: infect.info
 
-        data-set-name: infect-vet
-        domain: vet.infect.info
+    # anresis-vet:
+    #     sftp-server:
+    #         hostname: domain.search.ifik.unibe.ch
+    #         privateKey: ${ANRESIS_PRIVATE_KEY}
+    #         port: 22
+    #         username: infect
+    #         file-path: /upload/INFVET_export.csv
+
+    #     data-set-name: infect-vet
+    #     domain: vet.infect.info
 
 
 
@@ -45,8 +55,8 @@ mailer:
     apiKey: ${SENDGRID_API_KEY}
     from: reports@infect.info
     recipients:
-        - lina@joinbox.com
+        - lina@vanderweg.ch
 
 # keep locks for a year!
 lock-ttl: 31104000
-thread-count: 41
+thread-count: 1

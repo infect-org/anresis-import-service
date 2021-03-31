@@ -30,7 +30,7 @@ export default class FielTransfer {
         this.testMode = testMode;
 
         this.queue = [];
-        this.maxThreads = 1;
+        this.maxThreads = 1; // dont think about to chnage this!!! the offset will get random and the data too
         this.threadCount = 0;
     }
 

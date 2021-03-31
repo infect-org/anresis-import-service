@@ -45,7 +45,7 @@ mailer:
     apiKey: ${SENDGRID_API_KEY}
     from: reports@infect.info
     recipients:
-        - lina@joinbox.com
+        - lina@infect.info
         - pascal@infect.info
 
 # keep locks for a year!

@@ -7,6 +7,7 @@
   "scripts": {
     "test": "node --max-old-space-size=16000 --no-warnings --experimental-modules ./node_modules/.bin/section ./test/*.js --dev.testing --log-level=debug+ --log-module=*",
     "import-vet": "node --max-old-space-size=16000 --no-warnings --experimental-modules ./runImport.js --vet --dev --log-level=debug+ --log-module=*",
+    "import-test": "node --max-old-space-size=16000 --no-warnings --experimental-modules ./runImport.js --dev --log-level=debug+ --log-module=*",
     "import-human": "node --max-old-space-size=16000 --no-warnings --experimental-modules ./runImport.js --dev --log-level=debug+ --log-module=*",
     "import-prod-vet": "node --max-old-space-size=16000 --no-warnings --experimental-modules ./runImport.js --vet --prod --log-level=debug+ --log-module=*",
     "import-prod-human": "node --max-old-space-size=16000 --no-warnings --experimental-modules ./runImport.js --prod --log-level=debug+ --log-module=*",
